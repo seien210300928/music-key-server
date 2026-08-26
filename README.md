@@ -48,14 +48,17 @@
 4. 把文件或文件夹拖进去，选择输出格式，等待完成后下载或打包。
 5. 页面右上角的“退出”可以关闭本地服务。
 
-### 方式二：源码运行
+### 方式二：源码运行（需 Python 3.10+）
+
+克隆后在**仓库根目录**执行：
 
 ```powershell
-cd musickey
 python -m venv .venv
 .venv\Scripts\python.exe -m pip install -r requirements.txt
 .venv\Scripts\python.exe run.py             # 默认启动网页版并打开浏览器
 ```
+
+Windows 用户也可以直接双击 `start.bat`，它会自动创建虚拟环境并启动网页版。
 
 ### 命令行
 
