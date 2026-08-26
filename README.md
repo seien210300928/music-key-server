@@ -17,6 +17,15 @@
 
 ![MusicKey 界面](docs/screenshot.png)
 
+## 下载使用
+
+不想自己构建？直接在 [Releases 页面](https://github.com/Xiaowu-0916/music-key/releases) 下载即可：
+
+- **MusicKey.exe**：Windows 单文件版，双击启动网页界面，内置 ffmpeg。
+- **MusicKey-CLI.exe**：命令行批量版本。
+
+两个程序都是 45 MB 左右的单文件，下载后不用安装、不用配 Python，直接运行。
+
 ## 支持格式
 
 | 平台 | 扩展名 | 说明 |
@@ -33,10 +42,11 @@
 
 ### 方式一：Windows 单文件版
 
-1. 运行 `MusicKey.exe`。
-2. 浏览器会自动打开 `http://127.0.0.1:8690`。
-3. 把文件或文件夹拖进去，选择输出格式，等待完成后下载或打包。
-4. 页面右上角的“退出”可以关闭本地服务。
+1. 从 [Releases](https://github.com/Xiaowu-0916/music-key/releases) 下载 `MusicKey.exe`。
+2. 双击运行 `MusicKey.exe`。
+3. 浏览器会自动打开 `http://127.0.0.1:8690`。
+4. 把文件或文件夹拖进去，选择输出格式，等待完成后下载或打包。
+5. 页面右上角的“退出”可以关闭本地服务。
 
 ### 方式二：源码运行
 
