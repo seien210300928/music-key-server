@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "musickey"
+version = "1.0.0"
+description = "本地加密音乐格式转换工具"
+requires-python = ">=3.10"
+dependencies = [
+  "pycryptodome>=3.20",
+  "mutagen>=1.47",
+  "flask>=3.0",
+]
+
+[tool.setuptools]
+packages = ["musickey", "musickey.formats"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"musickey" = ["assets/*", "webui/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
