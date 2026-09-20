@@ -1,0 +1,37 @@
+MusicKey Server
+Copyright (C) 2026 4nnann
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+================================================================================
+Upstream attribution
+================================================================================
+
+The decryption algorithms and crypto core in `core/musickey-core.js` and
+`core/musickey-key.js` are derived from the following projects:
+
+- music-key (upstream): https://github.com/Xiaowu-0916/music-key
+  MIT License, Copyright (c) 2026 MusicKey contributors
+
+- music-geshizhuanhuan: https://github.com/HRuiCcc/music-geshizhuanhuan
+  MIT License, Copyright (c) 2026 music-geshizhuanhuan contributors
+  - Reference implementation of music format conversion
+
+- unlock-music / um-crypto: https://github.com/ix64/unlock-music
+  MIT License
+  - QMC v1 static keys, kugou public keys, and other public data sources
+
+The upstream decryption logic remains under the MIT License as required.
+All server-side code, web UI, build scripts, and configuration system in
+this project are released under AGPLv3 as stated above.

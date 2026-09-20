@@ -1,116 +1,142 @@
-# 音钥 MusicKey
+# MusicKey Server
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB.svg)](https://www.python.org/)
-[![Platform](https://img.shields.io/badge/Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg)](README.md)
-[![Tests](https://img.shields.io/badge/tests-9%2F9%20passed-brightgreen.svg)](tests)
+音乐解锁服务端 —— 支持 NCM / QMC / KGM / KWM 等加密音乐格式的在线解密，浏览器本地或服务端均可使用。
 
-一个把加密音乐变成标准音频文件的本地工具。支持网易云、QQ 音乐、酷狗、酷我四个平台的常见加密格式，**所有解密都在本机完成，不上传文件**。
+基于 [music-key](https://github.com/Xiaowu-0916/music-key)（MIT）的解密算法，封装为 Node.js 独立服务端。
 
-本项目的格式算法参考 MIT 协议的 [music-geshizhuanhuan](https://github.com/HRuiCcc/music-geshizhuanhuan)、[unlock-music](https://github.com/unlock-music) 等公开资料，并在其许可范围内重新实现了流式引擎、任务队列、前端与打包流程。
+## 功能
 
-## 项目介绍
-
-「音钥 MusicKey」是一款面向音乐文件持有者的本地格式恢复工具：将网易云 `.ncm`、QQ 音乐 `.mflac/.mgg/.qmc*/.tkm`、酷狗 `.kgm/.kgma/.vpr`、酷我 `.kwm` 等加密文件还原为普通播放器可以打开的 MP3、FLAC、M4A、WAV 或 OGG。
-
-它采用纯本地运行架构：网页服务默认只监听 `127.0.0.1`，文件不会离开电脑。项目提供网页版、命令行版和 Windows 单文件版，适合个人整理音乐库、导入车载 U 盘、剪辑软件或移动设备。
-
-![MusicKey 界面](docs/screenshot.png)
-
-## 下载使用
-
-不想自己构建？直接在 [Releases 页面](https://github.com/Xiaowu-0916/music-key/releases) 下载即可：
-
-- **MusicKey.exe**：Windows 单文件版，双击启动网页界面，内置 ffmpeg。
-- **MusicKey-CLI.exe**：命令行批量版本。
-
-两个程序都是 45 MB 左右的单文件，下载后不用安装、不用配 Python，直接运行。
-
-## 支持格式
-
-| 平台 | 扩展名 | 说明 |
-|---|---|---|
-| 网易云音乐 | `.ncm` | 完整提取歌名、歌手、专辑、封面 |
-| QQ 音乐 | `.mflac .mgg .mflac0 .mgg0 .mgg1 .mggl .mmp4 .qmcflac .qmcogg .qmc0~8` | v2 内嵌 EKey / QTag / PcV1Legacy |
-| QQ 音乐 | `.tkm .bkcmp3 .bkcm4a .bkcflac .bkcwav .bkcape .bkcogg .bkcwma` | v1 静态密钥 |
-| 酷狗音乐 | `.kgm .kgma .vpr .kgm.flac .vpr.flac` | v3/v4 离线可用 |
-| 酷我音乐 | `.kwm` | 老版格式 |
-
-输出格式：保持原样、MP3、FLAC、M4A、WAV、OGG。需要统一转码时可使用内置的 ffmpeg（单文件版已内置）。
+- **本地浏览器模式**：纯前端解密，无需上传文件，受浏览器内存限制
+- **服务端模式**：上传到服务器解密，支持大文件、分块上传，最终打包 ZIP 下载
+- **支持格式**：`.ncm`（网易云）、`.mflac` / `.mgg` / `.qmc0-3` / `.tkm` / `.bkc`（QQ音乐）、`.kgm` / `.kgma` / `.vpr`（酷狗）、`.kwm`（酷我）
+- **标签保留**：自动写入 MP3/FLAC 元数据和封面
+- **分块上传**：大文件自动切块上传，绕过 Cloudflare 等 CDN 的请求体大小限制
+- **自动清理**：内置清理脚本，可配合 Windows 计划任务定期删除临时文件
 
 ## 快速开始
 
-### 方式一：Windows 单文件版
+### 克隆启动
 
-1. 从 [Releases](https://github.com/Xiaowu-0916/music-key/releases) 下载 `MusicKey.exe`。
-2. 双击运行 `MusicKey.exe`。
-3. 浏览器会自动打开 `http://127.0.0.1:8690`。
-4. 把文件或文件夹拖进去，选择输出格式，等待完成后下载或打包。
-5. 页面右上角的“退出”可以关闭本地服务。
-
-### 方式二：源码运行（需 Python 3.10+）
-
-克隆后在**仓库根目录**执行：
-
-```powershell
-python -m venv .venv
-.venv\Scripts\python.exe -m pip install -r requirements.txt
-.venv\Scripts\python.exe run.py             # 默认启动网页版并打开浏览器
+```bash
+git clone https://github.com//seien210300928/music-key-server.git
+cd music-key-server
+start.bat
 ```
 
-Windows 用户也可以直接双击 `start.bat`，它会自动创建虚拟环境并启动网页版。
+首次启动会在同目录自动生成：
+- `config.json` —— 配置文件
+- `logs/` —— 运行日志
+- `update/` —— 上传文件临时目录
+- `download/` —— 解密输出目录
+- `清理临时文件.bat` —— 手动清理脚本
 
-### 命令行
+访问 `http://localhost:3001` 即可使用。
 
-```powershell
-# 解密到 unlocked 目录
-.venv\Scripts\python.exe run.py 歌曲.ncm
+## 配置文件
 
-# 目录递归，统一转码为 FLAC
-.venv\Scripts\python.exe run.py 音乐目录 -o out --format flac
+编辑 `config.json`：
 
-# 并行 4 个任务，显示任务进度
-.venv\Scripts\python.exe run.py 音乐目录 --jobs 4
-
-# 预览计划，不写文件
-.venv\Scripts\python.exe run.py 音乐目录 --dry-run
+```json
+{
+  "startPort": 3001,
+  "maxScan": 1000,
+  "fixedPort": 3001,
+  "cpuThreads": 2,
+  "maxMemory": 1024,
+  "chunkSizeMB": 10
+}
 ```
 
-常用参数：`-o/--output`、`--format`、`--jobs`、`--force`、`--no-recursive`、`--ekey`、`--ekey-db`、`--kgm-key`、`--ffmpeg`、`--json`、`--open`。
+| 字段 | 说明 | 默认值 |
+|------|------|--------|
+| `startPort` | 起始端口，扫描端口时从这里开始 | `3001` |
+| `maxScan` | 最多扫描多少个端口 | `1000` |
+| `fixedPort` | 固定端口，设为 `0` 则自动扫描空闲端口 | `3001` |
+| `cpuThreads` | 预留（服务端并发数） | `2` |
+| `maxMemory` | 预留（服务端内存限制，MB） | `1024` |
+| `chunkSizeMB` | 分块上传大小，单位 MB | `10` |
 
-## 为什么比原始方案更完善
+> 修改配置后重启服务生效。
 
-- **流式解码**：NCM、QMC、KGM、KWM 都按块读写，不再把整个音频文件读进内存；大文件和批量任务更稳定。
-- **准确的格式识别**：同时支持魔数、扩展名、QMC 尾包嗅探，修复了 `.kgm.flac`、`.vpr.flac` 这类多段后缀被漏掉的问题。
-- **异步网页服务**：上传后立刻返回任务号，服务端 2 路后台队列处理，前端可实时看到进度、预览、下载、取消和重试。
-- **更快的 KGM 核心**：用单字节推导表替代“17 相位 × 256×256”的大内存查表，速度更快且不会缓存数百 MB。
-- **完整标签链路**：解密后自动读取/保留原标签，NCM 元数据和封面写入 MP3、FLAC、M4A、OGG、WAV。
-- **更友好的界面**：响应式深色玻璃拟态 UI、文件夹拖放、筛选、批量打包、音频试听、任务状态。
-- **更可靠的打包**：提供 Windows 单文件 `MusicKey.exe` 与控制台 `MusicKey-CLI.exe`，并内置 ffmpeg 资源路径检测。
+## 反向代理示例
 
-## 构建单文件版
+### Caddy（局域网）
 
-在 Windows PowerShell 中：
+```caddy
+http://192.168.1.100 {
+    root * D:\path\to\website
+    encode gzip
 
-```powershell
-.\build.ps1
+    # MusicKey API
+    @mkapi path /health /config /upload/* /upload-chunk/* /merge/* /status/* /decrypt/* /pack/* /packstatus/* /download/*
+    handle @mkapi {
+        reverse_proxy localhost:3001
+    }
+
+    handle {
+        file_server
+    }
+}
 ```
 
-构建完成后：
+### Caddy（广域网 + Cloudflare）
 
-- `dist\MusicKey.exe`：双击启动网页版
-- `dist\MusicKey-CLI.exe`：命令行批量版本
+```caddy
+https://your-domain.com {
+    root * D:\path\to\website
+    encode gzip
 
-构建脚本会安装 `pyinstaller`、`imageio-ffmpeg`，并自动把 ffmpeg 与静态资源打进 exe。
+    @mkapi path /health /config /upload/* /upload-chunk/* /merge/* /status/* /decrypt/* /pack/* /packstatus/* /download/*
+    handle @mkapi {
+        reverse_proxy localhost:3001
+    }
 
-## 测试
-
-```powershell
-.venv\Scripts\python.exe -m pytest tests -q
+    handle {
+        file_server
+    }
+}
 ```
 
-测试使用程序合成的占位音频，验证 NCM、QMC v1/v2、KGM、KWM 的流式往返，以及网页 API 的上传、解码、下载、zip 全链路。
+> **Cloudflare 注意事项**：
+> - 橙色云代理有 ~100MB 请求体限制，大文件请使用分块上传（默认已启用）
 
-## 合规说明
+## 构建
 
-请仅处理自己合法购买、下载或有权使用的本地文件。禁止用于批量分发、倒卖或规避付费授权。本项目不包含遥测，不连接远程服务器。
+从源码构建独立 exe：
+
+```bash
+# 首次构建（自动安装依赖）
+build.bat
+
+# 后续构建
+npm run build
+```
+
+产物输出到 `dist/music-key-server.exe`，约 36MB，包含 Node.js 运行时和所有静态文件，可直接复制到其他 Windows 机器运行。
+
+## 目录结构
+
+```
+music-key-server/
+├── server.js              # 服务端入口
+├── config.json            # 配置文件
+├── build.bat              # 构建脚本
+├── package.json
+├── core/
+│   ├── musickey-core.js   # 解密核心引擎（MIT，来自上游）
+│   └── musickey-key.js    # 酷狗公钥表（MIT，来自上游）
+├── public/                # 前端文件
+│   ├── index.html
+│   ├── musickey.css
+│   ├── musickey-page.js
+│   ├── musickey-core.js
+│   └── musickey-key.js
+└── dist/
+    └── music-key-server.exe
+```
+
+## 许可证
+
+本项目采用 **AGPLv3** 许可证。
+
+解密算法核心（`core/musickey-core.js`、`core/musickey-key.js`）继承自上游 MIT 项目，详见 [NOTICE](NOTICE)。

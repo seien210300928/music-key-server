@@ -1,0 +1,424 @@
+/* ============================================================
+ * MusicKey 音乐解锁 —— 工具页样式（浅色，与主页同一套视觉语言）
+ * 位置：css/tools/musickey.css（仅 source/tools/MusicKey.html 使用）
+ * ============================================================ */
+
+:root {
+  --bg: #f3f5f6;
+  --card: #ffffff;
+  --line: #e3e8ea;
+  --ink: #1b2328;
+  --muted: #5f6b73;
+  /* 主题色体系：以 #66ccff 为核心衍生（说明见 home.css） */
+  --accent: #66ccff;
+  --accent-deep: #38bdf8;
+  --accent-ink: #0c4a6e;
+  --accent-text: #0369a1;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.6;
+  min-height: 100vh;
+  padding: 0 16px 48px;
+}
+
+svg { display: block; }
+
+/* ===================== 页面主体 ===================== */
+.mk-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.mk-hero {
+  padding: 32px 0 20px;
+}
+
+.mk-hero h1 {
+  margin: 0;
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--ink);
+}
+
+.mk-hero p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* ===================== 模式切换 ===================== */
+.mk-modes {
+  display: flex;
+  gap: 0;
+  margin-top: 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+}
+.mk-mode {
+  flex: 1;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13.5px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+  border-right: 1px solid var(--line);
+}
+.mk-mode:last-child { border-right: none; }
+.mk-mode.active {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+.mk-mode:not(.active):hover { background: #f1f3f4; color: var(--ink); }
+
+/* ===================== 面板 ===================== */
+.mk-panel {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin-top: 16px;
+}
+
+/* ---- 拖放区 ---- */
+.dropzone {
+  border: 1.5px dashed var(--line);
+  border-radius: 12px;
+  padding: 34px 18px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.1s;
+  background: #fafbfb;
+}
+.dropzone:hover, .dropzone.drag {
+  border-color: var(--accent);
+  background: #e6f4fe;
+}
+.dropzone svg {
+  width: 40px;
+  height: 40px;
+  color: #c3ccd0;
+  margin: 0 auto 8px;
+}
+.dropzone p { margin: 4px 0; font-size: 15px; color: var(--ink); }
+.dropzone .dz-sub {
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.dropzone input { display: none; }
+
+.dz-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+.dz-actions .btn {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--muted);
+  padding: 7px 16px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.dz-actions .btn:hover { border-color: var(--accent-text); color: var(--accent-text); }
+
+/* ---- EKey 输入 ---- */
+.ekey-panel label {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.ekey-panel input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 13.5px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.ekey-panel input:focus {
+  border-color: var(--accent-text);
+  box-shadow: 0 0 0 3px rgba(102, 204, 255, 0.35);
+}
+.ekey-panel .hint {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* ---- 工具栏 ---- */
+.mk-toolbar {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.mk-toolbar .btn {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--muted);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.mk-toolbar .btn:hover { border-color: var(--accent-text); color: var(--accent-text); }
+.mk-toolbar .btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+.mk-toolbar .btn.primary:hover { background: var(--accent-deep); border-color: var(--accent-deep); color: var(--accent-ink); }
+.mk-toolbar .btn.danger:hover { border-color: #ef4444; color: #ef4444; }
+.mk-toolbar .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ===================== 文件卡片列表 ===================== */
+.mk-list { margin-top: 18px; display: flex; flex-direction: column; gap: 12px; }
+
+.card {
+  --pc: #0369a1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  animation: rise 0.28s ease both;
+  transition: box-shadow 0.15s, border-color 0.15s;
+}
+.card:hover {
+  box-shadow: 0 4px 16px rgba(27, 35, 40, 0.06);
+  border-color: #c9d4d8;
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.card .cover {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  border-radius: 10px;
+  background: #f1f3f4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: var(--pc);
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+.card .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.card .info { flex: 1; min-width: 0; }
+.card .name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.card .name .relpath {
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--muted);
+  margin-right: 4px;
+}
+.card .name .platform {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--pc);
+  background: color-mix(in srgb, var(--pc) 12%, #fff);
+  border: 1px solid color-mix(in srgb, var(--pc) 35%, #fff);
+  vertical-align: 1px;
+}
+.card .meta {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.card .meta .dot { opacity: 0.4; }
+.card .meta .tagline { color: #7a8590; }
+.card .error {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #ef4444;
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+.card .progress {
+  margin-top: 8px;
+  height: 4px;
+  border-radius: 2px;
+  background: #eef2f3;
+  overflow: hidden;
+}
+.card .progress i {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  width: 4%;
+  transition: width 0.3s;
+}
+.card .progress i.running {
+  animation: mk-indet 1.4s ease-in-out infinite;
+}
+@keyframes mk-indet {
+  0% { width: 14%; }
+  50% { width: 78%; }
+  100% { width: 14%; }
+}
+
+/* 播放器 */
+.card .player {
+  margin-top: 8px;
+  width: 100%;
+  height: 32px;
+  border-radius: 8px;
+}
+
+.card .end {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+.card .state {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.card .state .sd { width: 7px; height: 7px; border-radius: 50%; background: #c3ccd0; }
+.card .state.running .sd { background: #f59e0b; animation: pulse 1s infinite; }
+.card .state.done .sd { background: #10b981; }
+.card .state.failed .sd { background: #ef4444; }
+.card .state.queued .sd { background: #c3ccd0; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+.card .actions { display: flex; gap: 8px; }
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--muted);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+.icon-btn:hover { border-color: var(--accent-text); color: var(--accent-text); }
+.icon-btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.icon-btn.primary:hover { background: var(--accent-deep); border-color: var(--accent-deep); color: var(--accent-ink); }
+.icon-btn svg { width: 16px; height: 16px; }
+.icon-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* ===================== 空态 ===================== */
+.mk-empty {
+  margin-top: 18px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  padding: 34px 0;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+
+/* ===================== Toast ===================== */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%) translateY(16px);
+  background: rgba(27, 35, 40, 0.94);
+  color: #fff;
+  font-size: 13px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  z-index: 1000;
+  max-width: min(520px, 86vw);
+  text-align: center;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ===================== 页脚 ===================== */
+.mk-foot {
+  margin-top: 22px;
+  font-size: 12px;
+  color: #9aa4ab;
+  line-height: 1.8;
+  text-align: center;
+}
+.mk-foot code {
+  background: #eef2f3;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 11.5px;
+  font-family: ui-monospace, Consolas, monospace;
+}
+
+/* ===================== 移动端 ===================== */
+@media (max-width: 560px) {
+  body { padding: 0 10px 36px; }
+  .mk-hero h1 { font-size: 21px; }
+  .card { flex-wrap: wrap; }
+  .card .end { flex-direction: row; align-items: center; width: 100%; justify-content: space-between; }
+}

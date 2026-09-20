@@ -1,8 +1,24 @@
-.venv/
-build/
-build_assets/
+# Node.js
+node_modules/
+npm-debug.log*
+
+# Build output
 dist/
-__pycache__/
-.pytest_cache/
-*.pyc
+build/
+build_cache/
+
+# Runtime generated (auto-created on first run)
+logs/
+update/
+download/
+config.json
+port.json
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp

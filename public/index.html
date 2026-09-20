@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MusicKey 音乐解锁</title>
+  <link rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230ea5e9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='7' height='7' rx='1.5'/%3E%3Crect x='14' y='3' width='7' height='7' rx='1.5'/%3E%3Crect x='3' y='14' width='7' height='7' rx='1.5'/%3E%3Crect x='14' y='14' width='7' height='7' rx='1.5'/%3E%3C/svg%3E">
+  <link rel="stylesheet"
+    href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="musickey.css">
+</head>
+
+<body>
+
+  <main class="mk-wrap">
+
+    <!-- ===================== 头部 ===================== -->
+    <header class="mk-hero">
+      <h1>MusicKey 音乐解锁</h1>
+      <p>在浏览器本地解密网易云（.ncm）、QQ音乐（.mflac/.mgg/.qmc/.tkm/.bkc）、酷狗（.kgm/.kgma/.vpr）、酷我（.kwm）等加密音频，全部计算在本机完成，文件不会上传。</p>
+    </header>
+
+    <!-- ===================== 模式切换 ===================== -->
+    <div class="mk-modes">
+      <button class="mk-mode active" data-mode="local" type="button">本地浏览器</button>
+      <button class="mk-mode" data-mode="server" type="button">上传服务器</button>
+    </div>
+
+    <!-- ===================== 拖放区 ===================== -->
+    <section class="mk-panel">
+      <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="选择或拖入加密音乐文件/文件夹">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 16V4m0 0 5 5m-5-5-5 5" />
+          <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+        </svg>
+        <p>把文件/文件夹拖到这里</p>
+        <p class="dz-sub" id="dzHint">支持 .ncm .mflac .mgg .qmc0-3 .qmcflac .qmcogg .tkm .bkc .kgm .kgma .vpr .kwm 等；一次只能上传一个文件夹，重新选择将清空当前列表</p>
+      </div>
+      <div class="dz-actions">
+        <button class="btn" id="pickFile" type="button">选择文件</button>
+        <button class="btn" id="pickDir" type="button">选择文件夹</button>
+      </div>
+      <input type="file" id="fileInput" multiple hidden
+        accept=".ncm,.mflac,.mgg,.qmc0,.qmc1,.qmc2,.qmc3,.qmcflac,.qmcogg,.tkm,.bkc,.kgm,.kgma,.vpr,.kwm,.skm,.vpr.flac,.kgm.flac">
+      <input type="file" id="dirInput" webkitdirectory multiple hidden>
+    </section>
+
+    <!-- ===================== EKey（可选） ===================== -->
+    <section class="mk-panel ekey-panel">
+      <label for="ekey">QMC v2 EKey（可选）</label>
+      <input type="text" id="ekey" autocomplete="off" spellcheck="false"
+        placeholder="部分无内嵌密钥的 .mgg / .mflac 需要，形如 V1xxx…">
+      <p class="hint">绝大多数 QQ 音乐文件自带密钥（QTag）无需填写；若某文件提示"无内嵌密钥"，把从客户端抓到的 EKey 粘贴到上方，再对该文件点重试即可。</p>
+      <p class="hint" style="color:#e07b00">⚠ EKey 功能未经过完整验证，不保证有效</p>
+    </section>
+
+    <!-- ===================== 工具栏（本地模式） ===================== -->
+    <div class="mk-toolbar" id="toolbarLocal">
+      <div style="width:100%;display:flex;gap:16px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mk-text)">
+          <input type="checkbox" id="localAutoDownload" style="width:16px;height:16px">
+          解密后自动下载
+        </label>
+      </div>
+      <div style="width:100%;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn primary" id="zipAll" type="button" disabled>下载全部（ZIP）</button>
+        <button class="btn" id="clearDone" type="button">清除已完成</button>
+        <button class="btn danger" id="clearAll" type="button">清空全部</button>
+      </div>
+    </div>
+
+    <!-- ===================== 工具栏（服务器模式） ===================== -->
+    <div class="mk-toolbar" id="toolbarServer" style="display:none">
+      <div style="width:100%;display:flex;gap:16px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mk-text)">
+          <input type="checkbox" id="autoDecrypt" style="width:16px;height:16px">
+          自动解密
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mk-text)">
+          <input type="checkbox" id="autoPack" style="width:16px;height:16px">
+          自动打包
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--mk-text)">
+          <input type="checkbox" id="autoDownload" style="width:16px;height:16px">
+          自动下载
+        </label>
+      </div>
+      <div style="width:100%;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn primary" id="srvUpload" type="button" disabled>1. 上传文件</button>
+        <button class="btn primary" id="srvDecrypt" type="button" disabled>2. 开始解密</button>
+        <button class="btn primary" id="srvPack" type="button" disabled>3. 打包 ZIP</button>
+        <button class="btn primary" id="srvDownload" type="button" disabled>4. 下载 ZIP</button>
+        <button class="btn danger" id="clearAllSrv" type="button">清空全部</button>
+      </div>
+    </div>
+
+    <!-- ===================== 文件列表 ===================== -->
+    <section class="mk-list" id="list"></section>
+    <div class="mk-empty" id="empty">还没有文件，把加密音乐拖进来吧</div>
+
+    <p class="mk-foot">
+      本地优先解密 · 内存不足时可降级到服务端 · 解密后保留原始容器与标签（MP3/FLAC 会写入标题、歌手、专辑与封面）
+      <br>源码参考 <a href="https://github.com/Xiaowu-0916/music-key" target="_blank" rel="noopener noreferrer" style="color:var(--accent-text);text-decoration:underline">github.com/Xiaowu-0916/music-key</a>，仅供个人备份已购曲目使用，请勿用于侵权用途
+    </p>
+  </main>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <!-- 加载顺序：密钥表 → 核心引擎 → 页面逻辑 -->
+  <script src="musickey-key.js"></script>
+  <script src="musickey-core.js"></script>
+  <script src="musickey-page.js"></script>
+</body>
+
+</html>

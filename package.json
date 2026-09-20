@@ -1,0 +1,22 @@
+{
+  "name": "music-key-server",
+  "version": "1.0.0",
+  "description": "MusicKey Server",
+  "bin": "server.js",
+  "pkg": {
+    "assets": [
+      "public/**/*",
+      "core/**/*"
+    ],
+    "targets": [
+      "node18-win-x64"
+    ],
+    "outputPath": "dist"
+  },
+  "scripts": {
+    "build": "pkg . --output dist/music-key-server.exe"
+  },
+  "devDependencies": {
+    "pkg": "latest"
+  }
+}
