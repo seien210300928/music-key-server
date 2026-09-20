@@ -65,39 +65,26 @@ start.bat
 ### Caddy（局域网）
 
 ```caddy
-http://192.168.1.100 {
-    root * D:\path\to\website
-    encode gzip
-
-    # MusicKey API
-    @mkapi path /health /config /upload/* /upload-chunk/* /merge/* /status/* /decrypt/* /pack/* /packstatus/* /download/*
-    handle @mkapi {
+http://192.168.1.69, http://seien-book {
+    handle_path /mk/* {
         reverse_proxy localhost:3001
-    }
-
-    handle {
-        file_server
     }
 }
 ```
+
+访问 `http://192.168.1.69/mk/` 即可使用。
 
 ### Caddy（广域网 + Cloudflare）
 
 ```caddy
 https://your-domain.com {
-    root * D:\path\to\website
-    encode gzip
-
-    @mkapi path /health /config /upload/* /upload-chunk/* /merge/* /status/* /decrypt/* /pack/* /packstatus/* /download/*
-    handle @mkapi {
+    handle_path /mk/* {
         reverse_proxy localhost:3001
-    }
-
-    handle {
-        file_server
     }
 }
 ```
+
+访问 `https://your-domain.com/mk/` 即可使用。
 
 > **Cloudflare 注意事项**：
 > - 橙色云代理有 ~100MB 请求体限制，大文件请使用分块上传（默认已启用）
