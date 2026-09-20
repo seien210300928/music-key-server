@@ -65,8 +65,13 @@ start.bat
 ### Caddy（局域网）
 
 ```caddy
-http://192.168.1.100, http://seien-book {
-    handle_path /mk/* {
+http://192.168.1.100 {
+    root * D:\path\to\website
+    encode gzip
+
+    # MusicKey API
+    @mkapi path /health /config /upload/* /upload-chunk/* /merge/* /status/* /decrypt/* /pack/* /packstatus/* /download/*
+    handle @mkapi {
         reverse_proxy localhost:3001
     }
 }
