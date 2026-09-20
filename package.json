@@ -14,7 +14,8 @@
     "outputPath": "dist"
   },
   "scripts": {
-    "build": "pkg . --output dist/music-key-server.exe"
+    "build": "pkg . --output dist/music-key-server.exe",
+    "clean": "node -e \"const fs=require('fs');['dist','logs','download','update','config.json','port.json'].forEach(f=>{try{fs.rmSync(f,{recursive:true,force:true})}catch(e){}});console.log('Cleaned (kept node_modules and node).')\""
   },
   "devDependencies": {
     "pkg": "latest"

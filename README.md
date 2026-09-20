@@ -28,7 +28,7 @@ start.bat
 - `logs/` —— 运行日志
 - `update/` —— 上传文件临时目录
 - `download/` —— 解密输出目录
-- `清理临时文件.bat` —— 手动清理脚本
+- `cleanup.bat` —— 手动清理临时文件脚本
 
 访问 `http://localhost:3001` 即可使用。
 
@@ -100,6 +100,15 @@ https://your-domain.com {
 > **Cloudflare 注意事项**：
 > - 橙色云代理有 ~100MB 请求体限制，大文件请使用分块上传（默认已启用）
 
+## 脚本说明
+
+| 脚本 | 用途 |
+|------|------|
+| `start.bat` | 启动服务（自动下载 Node.js） |
+| `build.bat` | 构建独立 exe 到 `dist/`（自动下载 Node.js 和依赖） |
+| `clean.bat` | 清理项目（删除 node、node_modules、dist、logs、update、download、config 等） |
+| `cleanup.bat` | 启动时自动生成，清理运行临时文件（update、download、logs），可挂到计划任务 |
+
 ## 构建
 
 从源码构建独立 exe：
@@ -119,9 +128,10 @@ npm run build
 ```
 music-key-server/
 ├── server.js              # 服务端入口
-├── config.json            # 配置文件
-├── build.bat              # 构建脚本
 ├── package.json
+├── start.bat              # 启动服务
+├── build.bat              # 构建 exe
+├── clean.bat              # 清理项目
 ├── core/
 │   ├── musickey-core.js   # 解密核心引擎（MIT，来自上游）
 │   └── musickey-key.js    # 酷狗公钥表（MIT，来自上游）

@@ -72,18 +72,18 @@ const LOGS_DIR = path.join(externalDir, 'logs');
 if (!fs.existsSync(LOGS_DIR)) fs.mkdirSync(LOGS_DIR, { recursive: true });
 
 /* 生成清理脚本 */
-const cleanupBat = path.join(externalDir, "清理临时文件.bat");
+const cleanupBat = path.join(externalDir, "cleanup.bat");
 try {
   if (!fs.existsSync(cleanupBat)) {
     fs.writeFileSync(cleanupBat,
       "@echo off\r\n" +
       "cd /d \"%~dp0\"\r\n" +
       "echo Cleaning update...\r\n" +
-      "del /q /s update\\*.* >nul 2>&1\r\n" +
-      "for /d %%x in (update\\*) do @rd /s /q \"%%x\" >nul 2>&1\r\n" +
+      "rmdir /s /q update 2>nul\r\n" +
       "echo Cleaning download...\r\n" +
-      "del /q /s download\\*.* >nul 2>&1\r\n" +
-      "for /d %%x in (download\\*) do @rd /s /q \"%%x\" >nul 2>&1\r\n" +
+      "rmdir /s /q download 2>nul\r\n" +
+      "echo Cleaning logs...\r\n" +
+      "rmdir /s /q logs 2>nul\r\n" +
       "echo Done.\r\n"
     );
   }

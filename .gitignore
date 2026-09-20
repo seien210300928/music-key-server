@@ -1,11 +1,14 @@
 # Node.js
 node_modules/
+node/
 npm-debug.log*
 
 # Build output
 dist/
 build/
 build_cache/
+node.zip
+node_temp/
 
 # Runtime generated (auto-created on first run)
 logs/
