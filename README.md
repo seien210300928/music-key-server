@@ -18,7 +18,7 @@
 ### 克隆启动
 
 ```bash
-git clone https://github.com//seien210300928/music-key-server.git
+git clone https://github.com/seien210300928/music-key-server.git
 cd music-key-server
 start.bat
 ```
