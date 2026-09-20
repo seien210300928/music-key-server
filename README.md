@@ -32,6 +32,8 @@ start.bat
 
 访问 `http://localhost:3001` 即可使用。
 
+> **注意**：由于浏览器 HTML 安全限制，网页无法自动启动本地服务，使用前必须先手动运行 `start.bat` 启动服务端。
+
 ## 配置文件
 
 编辑 `config.json`：
