@@ -16,6 +16,9 @@ update/
 download/
 config.json
 port.json
+/cleanup.bat
+/cleanup.sh
+
 
 # OS
 .DS_Store

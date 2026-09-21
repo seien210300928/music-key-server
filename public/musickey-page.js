@@ -1,10 +1,5 @@
-/* ============================================================
- * MusicKey 音乐解锁 —— 页面逻辑（纯前端，无服务端）
- * 位置：js/tools/musickey-page.js（仅 source/tools/MusicKey.html 使用）
- * 依赖（加载顺序见 MusicKey.html 底部）：
- *   js/tools/musickey-key.js —— 酷狗公钥表（LZMA1 base64 内嵌）
- *   js/tools/musickey-core.js —— 提供全局 MusicKeyCore（解密/标签/ZIP）
- * ============================================================ */
+﻿/* MusicKey page logic — frontend only */
+
 (function () {
   'use strict';
 
@@ -17,8 +12,7 @@
     return;
   }
 
-  /* ===================== 基础 ===================== */
-  var $ = function (id) { return document.getElementById(id); };
+    var $ = function (id) { return document.getElementById(id); };
   var listEl = $('list');
   var emptyEl = $('empty');
   var dropzone = $('dropzone');
@@ -33,8 +27,7 @@
   var seq = 0;
   var processing = false;
 
-  /* ===================== 模式切换 ===================== */
-  var mode = 'local'; /* 'local' | 'server' */
+    var mode = 'local'; /* 'local' | 'server' */
   var modeBtns = document.querySelectorAll('.mk-mode');
   var dzHint = $('dzHint');
   var toolbarLocal = $('toolbarLocal');
@@ -169,8 +162,7 @@
     el._t = setTimeout(function () { el.classList.remove('show'); }, 2600);
   }
 
-  /* ===================== 文件读取 ===================== */
-  function readAsArrayBuffer(file) {
+    function readAsArrayBuffer(file) {
     return new Promise(function (resolve, reject) {
       var fr = new FileReader();
       fr.onload = function () { resolve(fr.result); };
@@ -235,8 +227,7 @@
     });
   }
 
-  /* ===================== 状态机 ===================== */
-  /* 这些扩展名不参与解密，原样透传进 ZIP */
+    /* 这些扩展名不参与解密，原样透传进 ZIP */
   var PASSTHROUGH_EXT = ['.lrc', '.mp3', '.flac', '.wav', '.ogg', '.m4a', '.txt', '.jpg', '.jpeg', '.png', '.gif'];
 
   function isPassthrough(name) {
@@ -411,8 +402,7 @@
     }[container] || 'application/octet-stream';
   }
 
-  /* ===================== 渲染 ===================== */
-  function stateText(it) {
+    function stateText(it) {
     if (it.status === 'running') return it.phase === 'read' ? '读取中' : '解密中';
     if (it.status === 'done') return '完成';
     if (it.status === 'failed') return '失败';
@@ -556,8 +546,7 @@
     return b;
   }
 
-  /* ===================== 操作 ===================== */
-  function playItem(id) {
+    function playItem(id) {
     var it = items.get(id);
     if (!it || !it.audioUrl) return;
     window.open(it.audioUrl, '_blank', 'noopener');
@@ -615,8 +604,7 @@
     render();
   }
 
-  /* ===================== 服务端降级 ===================== */
-  var SERVER_START_PORT = 3000;
+    var SERVER_START_PORT = 3000;
   var SERVER_MAX_SCAN = 100;
 
   function getServerBase() {
@@ -973,8 +961,7 @@
     });
   }
 
-  /* ===================== 事件绑定 ===================== */
-  var pickFileBtn = $('pickFile');
+    var pickFileBtn = $('pickFile');
   var pickDirBtn = $('pickDir');
   pickFileBtn.addEventListener('click', function (e) {
     e.stopPropagation();

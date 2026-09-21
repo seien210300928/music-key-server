@@ -1,16 +1,5 @@
-/* ============================================================
- * musickey-core.js —— 音钥 MusicKey 纯前端核心引擎
- * ------------------------------------------------------------
- * 全部在浏览器本地运行，不上传任何文件。
- * 移植自 Python 项目 music-key（MIT 许可，算法参考 unlock-music
- * 等公开资料），并内置酷狗公钥表的 LZMA1 解码器。
- *
- * 导出全局对象 MusicKeyCore：
- *   lzma1Decompress(input, size?)      LZMA1 解压（酷狗密钥表）
- *   sniffContainer(head)               识别音频容器
- *   decodeFile(bytes, name, opts)      Promise<DecodeResult> 按格式解密
- *   makeZip(files)                     生成 store 方式 ZIP
- * ============================================================ */
+﻿/* MusicKey core engine */
+
 (function (global) {
   'use strict';
 
