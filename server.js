@@ -1,20 +1,4 @@
-﻿/* ============================================================
- * MusicKey 服务端降级解密（零依赖，仅用 Node.js 内置模块）
- * ------------------------------------------------------------
- * 启动：node server.js
- * 端口：优先 fixedPort（若配置且空闲），否则从 startPort 开始扫描
- * 目录：
- *   update/<clientId>/<jobId>/    —— 上传的原始文件（含文件夹结构）
- *   download/<clientId>/<jobId>/  —— 解密输出文件（含文件夹结构）
- *   download/<clientId>/<jobId>.zip —— 打包好的 ZIP
- *   logs/                         —— 日志文件
- * 流程：
- *   POST /upload/:jobId   → 单文件逐个上传
- *   GET  /status/:jobId   → 查询解密进度
- *   POST /decrypt/:jobId  → 逐个解密
- *   POST /pack/:jobId     → 流式打包 ZIP
- *   GET  /download/:jobId → 下载已打包 ZIP
- * ============================================================ */
+﻿/* MusicKey Server — 零依赖 Node.js 服务端 */
 
 const http = require('http');
 const fs = require('fs');
@@ -22,12 +6,12 @@ const path = require('path');
 const crypto = require('crypto');
 const net = require('net');
 
-/* 运行目录：打包后可写文件放在 exe 同目录 */
+/* 运行目录（打包后可写文件放 exe 同目录） */
 const externalDir = (typeof process.pkg !== 'undefined')
   ? path.dirname(process.execPath)
   : __dirname;
 
-/* ---------- CRC32 ---------- */
+/* CRC32 */
 const crcTable = (function() {
   const t = new Uint32Array(256);
   for (let i = 0; i < 256; i++) {
@@ -48,7 +32,7 @@ function crc32(buf) {
   return (crc ^ 0xFFFFFFFF) >>> 0;
 }
 
-/* ---------- 加载配置 ---------- */
+/* 配置 */
 const configPath = path.join(externalDir, 'config.json');
 let config = { startPort: 3000, maxScan: 100, fixedPort: 0, cpuThreads: 4, maxMemory: 8192 };
 try {
@@ -67,12 +51,13 @@ try {
   } catch(e2) { console.log('Cannot write config: ' + e2.message); }
 }
 
-/* ---------- 日志系统 ---------- */
+/* 日志 */
 const LOGS_DIR = path.join(externalDir, 'logs');
 if (!fs.existsSync(LOGS_DIR)) fs.mkdirSync(LOGS_DIR, { recursive: true });
 
 /* 生成清理脚本 */
 const cleanupBat = path.join(externalDir, "cleanup.bat");
+const cleanupSh = path.join(externalDir, "cleanup.sh");
 try {
   if (!fs.existsSync(cleanupBat)) {
     fs.writeFileSync(cleanupBat,
@@ -86,6 +71,20 @@ try {
       "rmdir /s /q logs 2>nul\r\n" +
       "echo Done.\r\n"
     );
+  }
+  if (!fs.existsSync(cleanupSh)) {
+    fs.writeFileSync(cleanupSh,
+      "#!/bin/bash\n" +
+      "cd \"$(dirname \"$0\")\"\n" +
+      "echo \"Cleaning update...\"\n" +
+      "rm -rf update\n" +
+      "echo \"Cleaning download...\"\n" +
+      "rm -rf download\n" +
+      "echo \"Cleaning logs...\"\n" +
+      "rm -rf logs\n" +
+      "echo \"Done.\"\n"
+    );
+    fs.chmodSync(cleanupSh, 0o755);
   }
 } catch(e) {}
 
@@ -110,7 +109,7 @@ function openLogStream() {
   if (logStream) { try { logStream.end(); } catch(e) {} }
   const fpath = path.join(LOGS_DIR, logFileName());
   logStream = fs.createWriteStream(fpath, { flags: 'a' });
-  /* 写入缓冲中的日志 */
+  
   for (const line of logBuffer) logStream.write(line + '\n');
   logBuffer = [];
 }
@@ -125,12 +124,12 @@ function log(msg) {
   }
 }
 
-/* 每小时切日志 */
+
 setInterval(function() {
   openLogStream();
 }, 3600 * 1000);
 
-/* 进程关闭时写日志 */
+
 function flushAndExit() {
   if (logStream) { try { logStream.end(); } catch(e) {} }
 }
@@ -138,11 +137,11 @@ process.on('exit', flushAndExit);
 process.on('SIGINT', function() { flushAndExit(); process.exit(0); });
 process.on('SIGTERM', function() { flushAndExit(); process.exit(0); });
 
-/* 启动第一个日志文件 */
+
 openLogStream();
 log('===== MusicKey Server 启动 =====');
 
-/* ---------- 加载解密核心（与前端共用同一份代码） ---------- */
+/* 解密核心 */
 const CORE_DIR = path.join(__dirname, 'core');
 require('./core/musickey-key.js');
 const MusicKeyCore = require('./core/musickey-core.js');
@@ -153,7 +152,7 @@ const DOWNLOAD_DIR = path.join(externalDir, 'download');
 if (!fs.existsSync(UPDATE_DIR)) fs.mkdirSync(UPDATE_DIR, { recursive: true });
 if (!fs.existsSync(DOWNLOAD_DIR)) fs.mkdirSync(DOWNLOAD_DIR, { recursive: true });
 
-/* ---------- 工具函数 ---------- */
+/* 工具函数 */
 function mkdirRecursive(dirPath) {
   fs.mkdirSync(dirPath, { recursive: true });
 }
@@ -193,7 +192,7 @@ function isPassthrough(name) {
   return PASSTHROUGH_EXT.some(ext => lower.endsWith(ext));
 }
 
-/* ---------- 极简 multipart/form-data 解析器 ---------- */
+/* multipart 解析 */
 function parseMultipart(buffer, boundary) {
   const parts = [];
   const boundaryBuf = Buffer.from('--' + boundary);
@@ -234,12 +233,12 @@ function parseMultipart(buffer, boundary) {
   return parts;
 }
 
-/* ---------- 打包进度状态（内存中） ---------- */
+/* 打包进度 */
 const packProgress = {}; // { jobId: { total, done, status: 'packing'|'done'|'error' } }
 
-/* ---------- HTTP 服务 ---------- */
+/* HTTP 服务 */
 const server = http.createServer(async (req, res) => {
-  /* CORS */
+  
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -247,7 +246,7 @@ const server = http.createServer(async (req, res) => {
 
   const url = new URL(req.url, `http://${req.headers.host}`);
 
-  /* 静态文件服务 */
+  
   if (req.method === 'GET') {
     const PUBLIC_DIR = path.join(__dirname, 'public');
     let filePath = path.normalize(path.join(PUBLIC_DIR, url.pathname));
@@ -265,7 +264,7 @@ const server = http.createServer(async (req, res) => {
     } catch (e) { /* fall through to API */ }
   }
 
-  /* POST /upload/:jobId?clientId=xxx —— 单文件逐个上传 */
+  /* POST /upload/:jobId */
   if (req.method === 'POST' && url.pathname.startsWith('/upload/')) {
     try {
       const jobId = url.pathname.split('/')[2];
@@ -309,7 +308,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  /* POST /merge/:jobId?clientId=xxx&filename=xxx —— 合并分块文件 */
+  /* POST /merge/:jobId */
   if (req.method === 'POST' && url.pathname.startsWith('/merge/')) {
     try {
       const jobId = url.pathname.split('/')[2];
@@ -317,7 +316,7 @@ const server = http.createServer(async (req, res) => {
       const filename = url.searchParams.get('filename') || 'unknown';
       const updateJobDir = path.join(UPDATE_DIR, clientId, jobId);
 
-      /* 找出所有 .partN 文件并按顺序合并 */
+      
       const parts = [];
       const prefix = path.basename(filename) + '.part';
       const dir = path.dirname(path.join(updateJobDir, filename));
@@ -355,7 +354,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  /* GET /status/:jobId?clientId=xxx —— 返回解密进度（total 从 update/ 读，done 从 download/ 读） */
+  /* GET /status/:jobId */
   if (req.method === 'GET' && url.pathname.startsWith('/status/')) {
     const jobId = url.pathname.split('/')[2];
     const clientId = url.searchParams.get('clientId') || 'default';
@@ -367,7 +366,7 @@ const server = http.createServer(async (req, res) => {
       total = collectFiles(updateJobDir).length;
     }
     if (fs.existsSync(downloadJobDir)) {
-      /* 只算文件，不算 .zip */
+      
       done = collectFiles(downloadJobDir).filter(f => !f.endsWith('.zip')).length;
     }
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -375,7 +374,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  /* POST /decrypt/:jobId?clientId=xxx —— 逐个解密 */
+  /* POST /decrypt/:jobId */
   if (req.method === 'POST' && url.pathname.startsWith('/decrypt/')) {
     const jobId = url.pathname.split('/')[2];
     const clientId = url.searchParams.get('clientId') || 'default';
@@ -406,7 +405,7 @@ const server = http.createServer(async (req, res) => {
             fs.copyFileSync(fullPath, outPath);
             done++;
             log('解密完成(透传): ' + relPath);
-            /* 让出事件循环，让 /status 轮询能响应 */
+            
             await new Promise(r => setImmediate(r));
             continue;
           }
@@ -441,7 +440,7 @@ const server = http.createServer(async (req, res) => {
             log('解密失败(保留原文件): ' + relPath + ' — ' + e.message);
           } catch (e2) { failed++; }
         }
-        /* 让出事件循环 */
+        
         await new Promise(r => setImmediate(r));
       }
 
@@ -456,7 +455,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  /* POST /pack/:jobId?clientId=xxx —— 流式打包到磁盘 */
+  /* POST /pack/:jobId */
   if (req.method === 'POST' && url.pathname.startsWith('/pack/')) {
     const jobId = url.pathname.split('/')[2];
     const clientId = url.searchParams.get('clientId') || 'default';
@@ -645,7 +644,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  /* GET /packstatus/:jobId?clientId=xxx —— 查询打包进度 */
+  /* GET /packstatus/:jobId */
   if (req.method === 'GET' && url.pathname.startsWith('/packstatus/')) {
     const jobId = url.pathname.split('/')[2];
     const p = packProgress[jobId] || { total: 0, done: 0, status: 'unknown' };
@@ -654,7 +653,7 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  /* GET /download/:jobId?clientId=xxx —— 直接下载已打包的 ZIP */
+  /* GET /download/:jobId */
   if (req.method === 'GET' && url.pathname.startsWith('/download/')) {
     const jobId = url.pathname.split('/')[2];
     const clientId = url.searchParams.get('clientId') || 'default';
@@ -685,14 +684,14 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  /* 健康检查 */
+  /* GET /health */
   if (url.pathname === '/health') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ ok: true }));
     return;
   }
 
-  /* 获取配置 */
+  /* GET /config */
   if (url.pathname === '/config') {
     res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
     res.end(JSON.stringify({ chunkSize: (config.chunkSizeMB || 10) * 1024 * 1024 }));
@@ -704,7 +703,7 @@ const server = http.createServer(async (req, res) => {
   res.end('Not found');
 });
 
-/* ---------- 端口选择：优先 fixedPort，否则扫描 ---------- */
+/* 端口选择 */
 function isPortAvailable(port) {
   return new Promise((resolve) => {
     const tester = net.createServer()
@@ -717,7 +716,7 @@ function isPortAvailable(port) {
 }
 
 async function findAvailablePort(start, maxScan) {
-  /* 优先 fixedPort */
+  
   if (config.fixedPort && config.fixedPort > 0) {
     if (await isPortAvailable(config.fixedPort)) {
       return config.fixedPort;

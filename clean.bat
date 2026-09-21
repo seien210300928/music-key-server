@@ -13,5 +13,6 @@ if exist download rmdir /s /q download
 if exist config.json del /q config.json
 if exist port.json del /q port.json
 if exist cleanup.bat del /q cleanup.bat
+if exist cleanup.sh del /q cleanup.sh
 echo Done.
 pause
